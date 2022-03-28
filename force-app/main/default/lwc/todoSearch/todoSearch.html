@@ -1,0 +1,27 @@
+<template>
+    <lightning-layout-item flexibility="auto, no-grow" padding="around-small">
+        <lightning-card variant="Narrow">
+            <lightning-input
+                type="search"
+                variant="label-hidden"
+                value={query}
+                onchange={handleChange}
+                slot="title"
+            ></lightning-input>
+
+            <lightning-button
+                label="Reset"
+                class="slds-var-m-left_x-small"
+                onclick={handleReset}
+                slot="actions"
+            ></lightning-button>
+            <lightning-button
+                label="Search"
+                class="slds-var-m-left_x-small"
+                icon-name="utility:search"
+                onclick={handleSearch}
+                slot="actions"
+            ></lightning-button>
+        </lightning-card>
+    </lightning-layout-item>
+</template>

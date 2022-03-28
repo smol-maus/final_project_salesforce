@@ -1,0 +1,13 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <template if:false={createMode}>
+        <lightning-button-icon onclick={handleState} class="slds-card__body slds-card__body_inner" label="" icon-name="utility:add" title="New sub task" variant="bare" size="medium"></lightning-button-icon>
+    </template>
+    <template if:true={createMode}>
+        <ul class="slds-list_horizontal slds-card__body slds-card__body_inner">
+            <li><lightning-input data-field="Name" name="sub name" variant="label-hidden" value="" required></lightning-input></li>
+            <li><lightning-button-icon onclick={handleState} class="slds-p-left_x-small" label="" icon-name="utility:close" title="Cancel" variant="bare" size="large"></lightning-button-icon></li>
+            <li><lightning-button-icon onclick={handleSave} class="slds-p-left_x-small" label="" icon-name="utility:save" title="Save" variant="bare" size="large"></lightning-button-icon></li>
+        </ul>
+    </template>
+</template>

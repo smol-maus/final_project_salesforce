@@ -1,0 +1,86 @@
+<!-- sldsValidatorIgnore -->
+<template>
+        <lightning-card>
+            <h4 slot="title">
+                <lightning-icon icon-name="utility:connected_apps" size="small"></lightning-icon>
+                <span class="slds-var-m-left_x-small"> {todo.Name}</span>
+            </h4>
+
+            <lightning-button-icon icon-name="utility:edit" slot="actions" onclick={handleEdit} alternative-text="Edit" class="slds-m-left_xx-small" title="Edit"></lightning-button-icon>
+            <lightning-button-icon icon-name="utility:delete" slot="actions" onclick={tryDelete} data-recordid={todo.Id} alternative-text="Delete" class="slds-m-left_xx-small" title="Delete"></lightning-button-icon>
+
+            <template if:false={edit}>
+                <div class="slds-var-p-horizontal_small" align="center">
+                    Created: <lightning-formatted-date-time value={todo.CreatedDate} year="2-digit" month="short"
+                        day="numeric" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                    <div>Due time: <span class={todo.RecordType.Name}>{todo.RecordType.Name} </span>
+                    ({todo.Status__c})</div>
+
+                    <template if:true={todo.Description__c}>
+                        <lightning-input type="text" readonly value={todo.Description__c} variant="label-hidden" ></lightning-input>
+                    </template>
+                </div>
+            </template>
+
+            <template if:true={edit}>
+                <div class="slds-card__body slds-card__body_inner">
+                    <lightning-input data-field="Name" name="sub name" variant="label-hidden" value={todo.Name} required></lightning-input>
+                    <div if:true={objectInfo.data}>
+                        <lightning-combobox data-field="Due" name="recordType" label="Due time" required
+                            value={todo.RecordTypeId} 
+                            options={recordTypes}>
+                        </lightning-combobox>
+                    </div>
+                    <lightning-combobox data-field="Status" name="status" label="Status" value={todo.Status__c}
+                        options={statuses} required
+                    ></lightning-combobox>
+                    <lightning-textarea data-field="Text" value={todo.Description__c} label="Description (optional)" placeholder="type here..." maxlength="255"></lightning-textarea>
+
+                    <div class="slds-p-around_x-small slds-align_absolute-center">
+                        <lightning-button
+                            label="Cancel"
+                            onclick={handleEdit}
+                        ></lightning-button>
+                        <lightning-button
+                            label="Save"
+                            variant="brand"
+                            class="slds-var-m-left_x-small"
+                            data-recordid={todo.Id}
+                            onclick={updateTodo}
+                        ></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+<!--             <template if:true={edit}>
+                <div class="slds-card__body slds-card__body_inner">
+                <lightning-record-edit-form
+                    object-api-name='Todo__c'
+                    record-id={todo.Id}>
+                <lightning-messages></lightning-messages>
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-input-field field-name="Status__c"></lightning-input-field>
+                        <lightning-input-field field-name="Description__c"></lightning-input-field>
+                    </div>
+                </div>
+                <div class="slds-var-m-top_medium">
+                    <lightning-button type="submit" variant="brand" label="subMIT"></lightning-button>
+                </div>
+                </lightning-record-edit-form>
+                </div>
+            </template> -->
+
+            <template if:false={edit}>
+            <template if:true={subs}>
+                <template for:each={subs} for:item="sub" >
+                    <span key={sub.Id}>
+                        <c-todo-sub-item sub={sub} onsuccess={handleSubToast}>
+                        </c-todo-sub-item>
+                    </span>
+                </template>
+            </template>
+            <c-todo-sub-create onsuccess={handleSubToast} master={todo.Id}></c-todo-sub-create>
+        </template>
+        </lightning-card>
+</template>
