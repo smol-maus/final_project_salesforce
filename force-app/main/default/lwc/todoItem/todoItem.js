@@ -11,6 +11,8 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { deleteRecord } from 'lightning/uiRecordApi';
 import { reduceErrors } from 'c/ldsUtils';
 import { updateRecord } from 'lightning/uiRecordApi';
+const master = 'Master';
+const expired = 'Expired';
 
 export default class TodoItem extends LightningElement {
     @api todo;
@@ -29,14 +31,22 @@ export default class TodoItem extends LightningElement {
         for(var eachRecordtype in recordtypeinfo)
         {
           if(recordtypeinfo.hasOwnProperty(eachRecordtype)
-                //как их скрыть
-                //&& recordtypeinfo[eachRecordtype].name != master
-                //&& recordtypeinfo[eachRecordtype].name != expired
+                && recordtypeinfo[eachRecordtype].name != master
+                && recordtypeinfo[eachRecordtype].name != expired
             )
           uiCombobox.push({ label: recordtypeinfo[eachRecordtype].name, value: recordtypeinfo[eachRecordtype].recordTypeId })
         }
         console.log('uiCombobox' + JSON.stringify(uiCombobox));
         return uiCombobox;
+    }
+
+    get statusIcon() {
+        if (this.todo.Status__c == 'Ready to Take'){
+            return 'action:priority';
+        } else if (this.todo.Status__c == 'In progress') {
+            return 'action:defer';
+        }
+        return 'action:check';
     }
 
     get statuses() {

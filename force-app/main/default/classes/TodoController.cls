@@ -12,6 +12,7 @@ public with sharing class TodoController {
                             Description__c
                         FROM Todo__c
                         WITH SECURITY_ENFORCED
+                        ORDER BY Status__c
                         LIMIT 50
                         ];
 
@@ -32,6 +33,7 @@ public with sharing class TodoController {
                         FROM Todo__c
                         WHERE Name LIKE :key
                         WITH SECURITY_ENFORCED
+                        ORDER BY Status__c
                         LIMIT 50
                         ];
     

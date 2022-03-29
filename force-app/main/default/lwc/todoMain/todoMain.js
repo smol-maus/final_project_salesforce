@@ -9,8 +9,7 @@ export default class TodoMain extends LightningElement {
     @track mapData = [];
     wiredResult;
     
-    @track displayed;
-    error;
+    @track displayed; //not used (yet)
 
     createMode = false;
 

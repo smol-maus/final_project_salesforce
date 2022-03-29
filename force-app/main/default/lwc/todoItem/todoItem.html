@@ -2,8 +2,8 @@
 <template>
         <lightning-card>
             <h4 slot="title">
-                <lightning-icon icon-name="utility:connected_apps" size="small"></lightning-icon>
-                <span class="slds-var-m-left_x-small"> {todo.Name}</span>
+                <lightning-icon icon-name={statusIcon} size="x-small"></lightning-icon>
+                <span class="slds-var-m-left_x-small"><b>{todo.Name}</b></span>
             </h4>
 
             <lightning-button-icon icon-name="utility:edit" slot="actions" onclick={handleEdit} alternative-text="Edit" class="slds-m-left_xx-small" title="Edit"></lightning-button-icon>
@@ -52,35 +52,32 @@
                 </div>
             </template>
 
-<!--             <template if:true={edit}>
-                <div class="slds-card__body slds-card__body_inner">
-                <lightning-record-edit-form
-                    object-api-name='Todo__c'
-                    record-id={todo.Id}>
-                <lightning-messages></lightning-messages>
-                <div class="slds-grid">
-                    <div class="slds-col slds-size_1-of-2">
-                        <lightning-input-field field-name="Status__c"></lightning-input-field>
-                        <lightning-input-field field-name="Description__c"></lightning-input-field>
-                    </div>
-                </div>
-                <div class="slds-var-m-top_medium">
-                    <lightning-button type="submit" variant="brand" label="subMIT"></lightning-button>
-                </div>
-                </lightning-record-edit-form>
-                </div>
-            </template> -->
+
+            
 
             <template if:false={edit}>
+                
             <template if:true={subs}>
+                
+                
+
                 <template for:each={subs} for:item="sub" >
-                    <span key={sub.Id}>
+                    <lightning-layout horizontal-align="end" key={sub.Id}>
+                    <lightning-layout-item flexibility="auto, no-grow" padding="none">
                         <c-todo-sub-item sub={sub} onsuccess={handleSubToast}>
                         </c-todo-sub-item>
-                    </span>
+                    </lightning-layout-item>
+                    </lightning-layout>
                 </template>
+
             </template>
+
+            <lightning-layout horizontal-align="end">
             <c-todo-sub-create onsuccess={handleSubToast} master={todo.Id}></c-todo-sub-create>
-        </template>
+            </lightning-layout>
+            
+
+            
+            </template>
         </lightning-card>
 </template>
