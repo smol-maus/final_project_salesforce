@@ -22,7 +22,6 @@ export default class TodoCreate extends LightningElement {
     get recordTypes() {
         var recordtypeinfo = this.objectInfo.data.recordTypeInfos;
         var uiCombobox = [];
-        console.log("recordtype" + recordtypeinfo);
         for(var eachRecordtype in recordtypeinfo)
         {
           if(recordtypeinfo.hasOwnProperty(eachRecordtype)
@@ -31,7 +30,6 @@ export default class TodoCreate extends LightningElement {
             )
           uiCombobox.push({ label: recordtypeinfo[eachRecordtype].name, value: recordtypeinfo[eachRecordtype].recordTypeId })
         }
-        console.log('uiCombobox' + JSON.stringify(uiCombobox));
         return uiCombobox;
     }
 
@@ -43,7 +41,6 @@ export default class TodoCreate extends LightningElement {
         }, true);
         if (allValid){
             const fields = {};
-            console.log('creating with type ' + this.recordTypeId);
             fields[NAME_FIELD.fieldApiName] = this.name;
             fields[STATUS_FIELD.fieldApiName] = this.status;
             fields[RECORD_TYPE.fieldApiName] = this.recordTypeId;

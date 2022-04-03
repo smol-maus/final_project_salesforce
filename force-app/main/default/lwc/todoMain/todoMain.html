@@ -1,26 +1,81 @@
+<!-- sldsValidatorIgnore -->
 <template>
     <lightning-layout horizontal-align="space" class="slds-align_absolute-center">
         <lightning-layout-item flexibility="auto, no-grow" padding="around-small">
-            <lightning-card variant="Narrow" title="Todo List">
-                <lightning-button label="Refresh" class="slds-var-p-left_x-small" slot="actions" onclick={refresh}></lightning-button>
-                <lightning-button label="Create" class="slds-var-p-left_x-small" slot="actions" onclick={handleCreateState}></lightning-button>
+            <lightning-card variant="Narrow" title="Todos">
+                <span slot="actions">
+                    <ul class="slds-list_horizontal">
+                        <li class="slds-var-p-left_x-small slds-m-top_x-small">
+                            (found {totalRecountCount} records)</li>
+                        <li><lightning-button-icon
+                            class="slds-var-m-left_x-small"
+                            icon-name="utility:sync"
+                            onclick={refresh}
+                            alternative-text="Force refresh"
+                        ></lightning-button-icon></li>
+                        <li><lightning-combobox name="recordType" variant="label-hidden"
+                                value={currentCategory} class="slds-var-p-left_x-small"
+                                options={categoryList} onchange={handleCategory}>
+                            </lightning-combobox></li>
+                        <li><lightning-button-stateful
+                            label-when-off="Create" label-when-on="Creating" label-when-hover="Cancel"
+                            icon-name-when-off="utility:retail_execution"
+                            icon-name-when-on="utility:retail_execution"
+                            icon-name-when-hover="utility:reply" class="slds-var-p-left_x-small"
+                            onclick={handleCreateState} selected={createMode}></lightning-button-stateful></li>
+                    </ul>
+                </span>
             </lightning-card>
         </lightning-layout-item>
-        <c-todo-search onfind={handleFind}></c-todo-search>
+
+        <lightning-layout-item flexibility="auto, no-grow" padding="around-small">
+            <lightning-card variant="Narrow">
+                <span slot="actions">
+                    <ul class="slds-list_horizontal">
+                        <li><lightning-button-icon  variant="container" alternative-text="First page" icon-name="utility:jump_to_left" onclick={handleFirstPage}></lightning-button-icon></li>
+                        <li><lightning-button-icon  variant="container" alternative-text="Previous page" icon-name="utility:chevronleft" onclick={handlePreviousPage}></lightning-button-icon></li>
+                        <li class="slds-text-heading_small slds-text-align_center slds-var-p-left_xx-small slds-m-top_xx-small">{pageInfo}</li>
+                        <li><lightning-button-icon  variant="container" alternative-text="Next page" icon-name="utility:chevronright" class="slds-var-p-left_xx-small" onclick={handleNextPage}></lightning-button-icon></li>
+                        <li><lightning-button-icon  variant="container" alternative-text="Last page" icon-name="utility:jump_to_right" class="slds-var-p-left_xx-small" onclick={handleLastPage}></lightning-button-icon></li>
+                    </ul>
+                </span>
+            </lightning-card>
+        </lightning-layout-item>
+
+        <lightning-layout-item flexibility="auto, no-grow" padding="around-small">
+            <c-todo-search onfind={handleFind}></c-todo-search>
+        </lightning-layout-item>
     </lightning-layout>
 
     <template if:true={createMode}>
         <c-todo-create onsuccess={successEventToast} onnocreate={handleCreateState}></c-todo-create>
     </template>
 
-    <template if:true={mapData}>
-        <lightning-layout multiple-rows>
-            <template for:each={mapData} for:item="keyValue">
-                <lightning-layout-item flexibility="auto" size="3" padding="around-small" key={keyValue.key.Id}>
+    <template if:false={createMode}>
+        <lightning-layout vertical-align="stretch" multiple-rows>
+            <template for:each={displayedPage} for:item="keyValue">
+                <lightning-layout-item  size="3" padding="around-small" key={keyValue.key.Id}>
                     <c-todo-item todo={keyValue.key} subs={keyValue.value} onsuccess={successEventToast}>
                     </c-todo-item>
                 </lightning-layout-item>
             </template>
         </lightning-layout>
     </template>
+    <template if:true={emptyState}>
+        <lightning-layout horizontal-align="space">
+            <lightning-card>
+                <div slot="title" align="center">
+                    No data with these parameters.
+                    <p>{error}</p>
+                </div>
+                <div align="center"><lightning-button
+                    label="Clear Parameters"
+                    variant="brand"
+                    class="slds-m-top_medium"
+                    onclick={handleClear}
+                ></lightning-button></div>
+            </lightning-card>
+        </lightning-layout>
+    </template>
+
 </template>

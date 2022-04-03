@@ -18,10 +18,6 @@ export default class TodoItem extends LightningElement {
     @api todo;
     @api subs;
     edit = false;
-
-    handleEdit() {
-        this.edit = !this.edit;
-    }
     
     @wire(getObjectInfo, { objectApiName: TODO_OBJECT}) objectInfo;
 
@@ -36,7 +32,6 @@ export default class TodoItem extends LightningElement {
             )
           uiCombobox.push({ label: recordtypeinfo[eachRecordtype].name, value: recordtypeinfo[eachRecordtype].recordTypeId })
         }
-        console.log('uiCombobox' + JSON.stringify(uiCombobox));
         return uiCombobox;
     }
 
@@ -56,6 +51,17 @@ export default class TodoItem extends LightningElement {
             { label: 'Done', value: 'Done' },
         ];
     }
+    
+    handleEdit() {
+        this.edit = !this.edit;
+    }
+    
+    handleSubToast(event) {
+        const subEvent = new CustomEvent('success', {
+            detail: event.detail
+        });
+        this.dispatchEvent(subEvent);
+    }
 
     updateTodo(event) {
         const allValid = [...this.template.querySelectorAll('lightning-input')]
@@ -71,7 +77,6 @@ export default class TodoItem extends LightningElement {
             fields[RECORD_TYPE.fieldApiName] = this.template.querySelector("[data-field='Due']").value;
             fields[DESCRIPTION_FIELD.fieldApiName] = this.template.querySelector("[data-field='Text']").value;
             const recordInput = { fields };
-            console.log('fields ' + fields);
             
             updateRecord(recordInput)
                 .then(() => {
@@ -101,15 +106,7 @@ export default class TodoItem extends LightningElement {
         }
     }
 
-    handleSubToast(event) {
-        const subEvent = new CustomEvent('success', {
-            detail: event.detail
-        });
-        this.dispatchEvent(subEvent);
-    }
-
     tryDelete(event) {
-        console.log('trying to delete');
         const recordId = event.target.dataset.recordid;
         deleteRecord(recordId)
             .then(() => {
@@ -128,25 +125,4 @@ export default class TodoItem extends LightningElement {
                 );
             });
     }
-
-/*     get recordType(){
-        const rtis = this.objectInfo.data.recordTypeInfos;
-        const rtId = getFieldValue(this.todo.data,  RECORDTYPEID);
-        let recordType = Object.keys(rtis).find(rti => rtis[rti].id === rtId);
-        return recordType;
-    } */
-
-    /*        console.log('1 ');
-        let rtis = this.objectInfo.data.recordTypeInfos;
-        console.log('2 ' + this.todo.RecordType.Name);
-        
-        console.log('2 ' + this.todo.RecordTypeName);
-         console.log('infos ' + this.objectInfo.data.recordTypeInfos);
-
-        let rtId = this.todo.RecordTypeId;
-        
-        console.log('object: ' + Object.keys(rtis).find(rti => rtis[rti].Id === '0125j000000eIGmAAM'));
-        console.log('3 ');
-        const rtInfo = Object.keys(rtis).find(rti => rtis[rti].id === rtId);
-        console.log('object: ' + rtInfo.name); */
 }

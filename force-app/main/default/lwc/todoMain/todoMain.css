@@ -1,0 +1,14 @@
+.box {
+    display: flex;
+    align-items: stretch;
+    border: var(--lwc-borderWidthThin, 1px) black;
+  }
+  
+:host {
+  --slds-c-card-heading-font-weight: 600;
+}
+
+.c-container {
+  border: 1px solid #d8dde6;
+  margin: 10px 0 20px 0;
+}

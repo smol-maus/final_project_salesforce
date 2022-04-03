@@ -5,8 +5,24 @@
 .true {
     text-decoration: line-through;
     color: grey;
+
+    /* @sldsValidatorIgnore */
+    white-space: nowrap;
+    overflow: hidden;
+    width: 180px;
+    text-overflow: clip;
+    text-align: end;
+    
 }
 
 .false {
     color: black;
+
+    /* @sldsValidatorIgnore */
+    white-space: nowrap;
+    overflow: hidden;
+    width: 180px;
+    text-overflow: clip;
+    text-align: end;
+
 }

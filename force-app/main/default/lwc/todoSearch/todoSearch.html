@@ -1,27 +1,41 @@
+<!-- sldsValidatorIgnore -->
 <template>
-    <lightning-layout-item flexibility="auto, no-grow" padding="around-small">
-        <lightning-card variant="Narrow">
-            <lightning-input
-                type="search"
-                variant="label-hidden"
-                value={query}
-                onchange={handleChange}
-                slot="title"
-            ></lightning-input>
+    <lightning-card variant="Narrow">
+        <span slot="actions">
+            <ul class="slds-list_horizontal">
+                <li><lightning-button-stateful
+                    label-when-off="Title only"
+                    label-when-on="All fields"
+                    icon-name-when-off="utility:signpost"
+                    icon-name-when-on="utility:survey"
+                    class="slds-var-m-right_x-small"
+                    selected={allFields}
+                    variant="text"
+                    onclick={handleFields}>
+                </lightning-button-stateful></li>
 
-            <lightning-button
-                label="Reset"
-                class="slds-var-m-left_x-small"
-                onclick={handleReset}
-                slot="actions"
-            ></lightning-button>
-            <lightning-button
-                label="Search"
-                class="slds-var-m-left_x-small"
-                icon-name="utility:search"
-                onclick={handleSearch}
-                slot="actions"
-            ></lightning-button>
-        </lightning-card>
-    </lightning-layout-item>
+                <li><lightning-input
+                    type="search"
+                    variant="label-hidden"
+                    value={query}
+                    placeholder="Search here"
+                    onchange={handleChange}
+                    onkeyup={handleEnter}
+                ></lightning-input></li>
+
+                <li><lightning-button-icon
+                    class="slds-var-m-left_x-small"
+                    icon-name="utility:record_lookup"
+                    onclick={handleSearch}
+                    alternative-text="Go"
+                ></lightning-button-icon></li>
+
+                <li><lightning-button
+                    label="Clear"
+                    class="slds-var-m-left_x-small"
+                    onclick={handleReset}
+                ></lightning-button></li>
+            </ul>
+        </span>
+    </lightning-card>
 </template>

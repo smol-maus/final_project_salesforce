@@ -2,28 +2,30 @@
     <lightning-layout horizontal-align="space" class="slds-align_absolute-center">
         <lightning-layout-item flexibility="auto, no-grow" padding="around-small">
             <lightning-card>
-                <h4 slot="title">
+                <h6 slot="title">
                     <lightning-input class="slds-var-p-left_xx-small" label="Name" required placeholder="Enter name"
                         variant="label-hidden" onchange={handleName}></lightning-input>
-                </h4>
+                </h6>
 
                 <div class="slds-card__body slds-card__body_inner">
-                    <lightning-layout-item flexibility="auto">
-                        <ul class="slds-list_horizontal">
+
+                    <ul class="slds-list_horizontal">
+                        <lightning-layout-item flexibility="grow">
                             <template if:true={objectInfo.data}>
                                 <li>
-                                    <lightning-combobox label="Due time" placeholder="Today"
-                                        class="slds-var-p-left_x-small" value={recordTypeId} options={recordTypes}
-                                        onchange={handleType}>
+                                    <lightning-combobox label="Due time" placeholder="Today" value={recordTypeId}
+                                        options={recordTypes} onchange={handleType}>
                                     </lightning-combobox>
                                 </li>
                             </template>
+                        </lightning-layout-item>
+                        <lightning-layout-item flexibility="grow">
                             <li>
-                                <lightning-combobox label="Status" value={status} class="slds-var-p-left_x-small"
+                                <lightning-combobox label="Status" value={status} class="slds-var-p-left_xx-small"
                                     options={statuses} onchange={handleStatus}></lightning-combobox>
                             </li>
-                        </ul>
-                    </lightning-layout-item>
+                        </lightning-layout-item>
+                    </ul>
                 </div>
 
                 <div class="slds-card__body slds-card__body_inner">

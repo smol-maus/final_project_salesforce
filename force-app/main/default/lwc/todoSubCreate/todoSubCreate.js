@@ -6,8 +6,8 @@ import { createRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { reduceErrors } from 'c/ldsUtils';
 export default class TodoSubCreate extends LightningElement {
-    createMode = false;
     @api master;
+    createMode = false;
 
     handleState() {
         this.createMode = !this.createMode;
