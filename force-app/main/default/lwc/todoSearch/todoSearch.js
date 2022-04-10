@@ -1,26 +1,50 @@
 import { LightningElement, api } from 'lwc';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getSearchedMap from '@salesforce/apex/TodoController.getSearchedMap';
-import getFullSearchedMap from '@salesforce/apex/TodoController.getFullSearchedMap';
 
 export default class TodoSearch extends LightningElement {
 
     query = '';
-    allFields = false;
+    isAllFields = false;
+    @api searched;
 
-    @api
-    currentQuery() {
-        return this.query;
+    get state() {
+        return !this.searched;
     }
 
     @api
     handleReset() {
         this.query = '';
-        this.handleSearch();
+        this.dispatchEvent(new CustomEvent('reset'));
+    }
+
+    handleSearch() {
+        if (this.query.trim().length === 0) {
+            this.handleReset();
+            return;
+        }
+        this.dispatchEvent(new CustomEvent('search'));
+    }
+
+    @api
+    search(input) {
+        let searched = [];
+        let regexp = new RegExp(this.query, 'i');
+        if (this.isAllFields == false) {
+            searched = input.filter(el => regexp.test(el.key.Name));
+        } else {
+            searched = input.filter(function (el) {
+                if (regexp.test(el.key.Name)) return true;
+                if (regexp.test(el.key.Description__c)) return true;
+                if (el.value == null) return false;
+                for (let sub of el.value) {
+                    if (regexp.test(sub.Name)) return true;                     
+                }
+            });
+        }
+        return searched;
     }
 
     handleFields() {
-        this.allFields = !this.allFields;
+        this.isAllFields = !this.isAllFields;
     }
 
     handleChange(event) {
@@ -32,11 +56,12 @@ export default class TodoSearch extends LightningElement {
             this.handleSearch();
         }
     }
+}
 
-    @api
-    handleSearch() {
+/* 
+    handleOldSearch() {
         const searchKey = this.query;
-        if (this.allFields == false || this.query == '') {
+        if (this.isAllFields == false || this.query == '') {
             getSearchedMap({ searchKey })
                 .then((result) => {
                     const mapData = [];
@@ -92,5 +117,4 @@ export default class TodoSearch extends LightningElement {
                 );
             });
         }
-    }
-}
+    } */

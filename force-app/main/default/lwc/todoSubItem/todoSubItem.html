@@ -3,18 +3,18 @@
     <template if:true={sub}>
         <template if:false={editMode}>
             <ul class="slds-list_horizontal slds-m-bottom_x-small">
-                <li class={done}>{name}</li>
-                <li><lightning-input type="checkbox" class="slds-p-left_x-small" disabled checked={done}></lightning-input></li>
+                <li class={sub.Done__c}>{sub.Name}</li>
+                <li><lightning-input type="checkbox" class="slds-p-left_x-small" disabled checked={sub.Done__c}></lightning-input></li>
                 <li><lightning-button-icon onclick={handleEdit} icon-name="utility:edit" title="update sub" variant="bare" size="medium"></lightning-button-icon></li>
-                <li><lightning-button-icon onclick={handleDelete} class="slds-p-left_x-small" data-recordid={sub.Id} label="" icon-name="utility:delete" title="delete sub" variant="bare" size="medium"></lightning-button-icon></li>
+                <li><lightning-button-icon onclick={handleDelete} class="slds-p-left_x-small" label="" icon-name="utility:delete" title="delete sub" variant="bare" size="medium"></lightning-button-icon></li>
             </ul>
         </template>
         <template if:true={editMode}>
             <ul class="slds-list_horizontal slds-m-bottom_small">
-                <li><lightning-input data-field="Name" name="sub name" variant="label-hidden" value={name} required></lightning-input>
-                    <lightning-input data-field="Done" class="slds-m-right_large" type="checkbox" label="Mark as done?" checked={done}></lightning-input></li>
+                <li><lightning-input data-field="Name" name="sub name" variant="label-hidden" value={sub.Name} required></lightning-input>
+                    <lightning-input data-field="Done" class="slds-m-right_large" type="checkbox" label="Mark as done?" checked={sub.Done__c}></lightning-input></li>
                 <li><lightning-button-icon onclick={handleEdit} class="slds-p-left_x-small" icon-name="utility:close" title="Cancel" variant="bare" size="large"></lightning-button-icon></li>
-                <li><lightning-button-icon onclick={handleSave} data-recordid={sub.Id} class="slds-p-left_x-small" label="" icon-name="utility:save" title="Save" variant="bare" size="large"></lightning-button-icon></li>
+                <li><lightning-button-icon onclick={handleSave} class="slds-p-left_x-small" label="" icon-name="utility:save" title="Save" variant="bare" size="large"></lightning-button-icon></li>
             </ul>
         </template>
     </template>

@@ -4,69 +4,102 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import noHeader from '@salesforce/resourceUrl/NoHeader';
 import getTodoMap from '@salesforce/apex/TodoController.getTodoMap';
+import getRecordTypes from '@salesforce/apex/TodoController.getRecordTypes';
 
 export default class TodoMain extends LightningElement {
-    page = 1; 
+
+    page = 1;
     startingRecord = 1;
     endingRecord = 0;
     pageSize = 4;
     totalRecountCount = 0;
     totalPage = 0;
 
-    mapData = [];
-    wiredResult;
-
-    createMode = false;
+    widthOutput = window.innerWidth;
+    currentCategory = 'All';
+    isSearched = false;
+    createState = false;
     emptyState = true;
+    recordTypes = [];
     error;
 
-    @track currentData = [];
+    wiredResult;
+    coreData = [];
+    filteredData = [];
+    displayedData = [];
     @track displayedPage = [];
-    currentCategory = 'All';
 
     @wire(getTodoMap)
     wiredMap(result) {
         this.wiredResult = result;
-        this.mapData = [];
+        this.coreData = [];
         if (result.data) {
             for (let key in result.data) {
                 let obj = JSON.parse(key);
                 let date = obj.CreatedDate;
                 date = date.slice(0,26) + ':' + date.slice(-2); //why
                 obj.CreatedDate = date;
-                this.mapData.push({value:result.data[key], key:obj});
+                this.coreData.push({value:result.data[key], key:obj});
             }
-            this.getByCategory();
-
-            this.totalRecountCount = this.currentData.length;
-            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize);
-            if (this.totalPage < this.page) {
-                this.page = this.totalPage;
-            }
-            this.displayRecordPerPage(this.page);
-
-            this.emptyCheck();
-            
+            this.pageResetAndFilter();
         } else if (result.error) {
+            this.emptyState = true;
             this.error = result.error;
         }
     }
 
-    getByCategory(){
-        this.currentData = [];
+    filterData(){
+        if (this.isSearched) {
+            this.filteredData = this.template.querySelector('c-todo-search').search(this.coreData);
+        } else {
+            this.filteredData = this.coreData;
+        }
+
+        this.displayedData = [];
         if (this.currentCategory == 'All') {
-            this.currentData = this.mapData;
+            this.displayedData = this.filteredData;
             return;
         };
-        for (let item of this.mapData) {
+        for (let item of this.filteredData) {
             if (item.key.RecordType.Name == this.currentCategory){
-                this.currentData.push(item);
+                this.displayedData.push(item);
             };
         }
     }
 
+    updateTodo(event){
+        for (let i = 0; i < this.coreData.length; i++) {
+            if (this.coreData[i].key.Id == event.detail.key.Id) {
+                this.coreData.splice(i, 1, event.detail);
+                break;
+            }
+        }
+        this.filterData();
+        this.displayPage();
+        this.showSucessToast('Updated');
+    }
+
+    createTodo(event) {
+        this.coreData.unshift({value:null, key:event.detail});
+        this.handleCreateState();
+        this.template.querySelector('c-todo-search').handleReset();
+        this.showSucessToast('Created!');
+    }
+
+    deleteTodo(event) {
+        for (let i = 0; i < this.coreData.length; i++) {
+            if (this.coreData[i].key.Id == event.detail) {
+                this.coreData.splice(i, 1);
+                break;
+            }
+        }
+        this.filterData();
+        this.displayPage();
+        this.showSucessToast('Todo deleted');
+    }
+
     emptyCheck(){
-        if (this.currentData.length == 0){
+        if (this.displayedData.length == 0){
             this.emptyState = true;
         } else {
             this.emptyState = false;
@@ -74,41 +107,17 @@ export default class TodoMain extends LightningElement {
     };
 
     refresh(){
-        if (this.template.querySelector('c-todo-search').currentQuery() != '') {
-            return this.template.querySelector('c-todo-search').handleSearch();
-        };
+        this.isSearched = false;
         refreshApex(this.wiredResult);
     }
 
-    handleCategory(event){
-        this.currentCategory = event.target.value;
-        this.getByCategory();
-        this.pageReset();
-    }
-
-    handleFind(event){
-        this.mapData = event.detail;
-        this.getByCategory();
-        this.pageReset();
-    }
-
-    handleCreateState(){
-        this.createMode = !this.createMode;
-    }
-
     showSucessToast(message){
-        this.refresh();
-        this.createMode = false;
         this.dispatchEvent( new ShowToastEvent({
                 title: 'Success',
                 message: message,
                 variant: 'success'
             })
         );
-    }
-
-    successEventToast(event){
-        this.showSucessToast(event.detail);
     }
 
     get pageInfo() {
@@ -121,60 +130,109 @@ export default class TodoMain extends LightningElement {
             {label: 'Today', value: 'Today'},
             {label: 'Tomorrow', value: 'Tomorrow'},
             {label: 'Later', value: 'Later'},
-            {label: 'Expired', value: 'Expired'},
+            //{label: 'Expired', value: 'Expired'},
         ];
     }
 
-    displayRecordPerPage(page){
-        this.startingRecord = ((page -1) * this.pageSize) ;
-        this.endingRecord = (this.pageSize * page);
-        this.endingRecord = (this.endingRecord > this.totalRecountCount) 
-                            ? this.totalRecountCount : this.endingRecord; 
-
-        this.displayedPage = this.currentData.slice(this.startingRecord, this.endingRecord);
-        this.startingRecord = this.startingRecord + 1;
+    get cardSize() {
+        if(this.widthOutput < 790){
+            return 6;
+        } else if (this.widthOutput < 1000) {
+            return 4;
+        }
+        return 3;
     }
 
-    pageReset(){
-        this.emptyCheck();
+    handleCreateState(){
+        this.createState = !this.createState;
+    }
+
+    handleCategory(event){
+        this.currentCategory = event.target.value;
+        this.pageResetAndFilter();
+    }
+
+    handleFind() {
+        this.isSearched = true;
+        this.pageResetAndFilter();
+    }
+
+    handleFindReset() {
+        this.isSearched = false;
+        this.pageResetAndFilter();
+    }
+
+    handleClearParameters() {
+        this.currentCategory = 'All';
+        this.template.querySelector('c-todo-search').handleReset();
+    }
+
+    pageResetAndFilter(){
+        this.filterData();
         this.page = 1;
         this.startingRecord = 1;
         this.endingRecord = this.pageSize;
-        this.totalRecountCount = this.currentData.length;
+        this.displayPage();   
+    }
+
+    displayPage(){
+        this.totalRecountCount = this.displayedData.length;
         this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize);
-        this.displayRecordPerPage(this.page);   
+        if (this.totalPage < this.page) {
+            this.page = this.totalPage;
+        } //если последний элемент на странице удален, перейти на предыдущую
+
+        this.startingRecord = ((this.page -1) * this.pageSize) ;
+        this.endingRecord = (this.pageSize * this.page);
+        this.endingRecord = (this.endingRecord > this.totalRecountCount) 
+                            ? this.totalRecountCount : this.endingRecord; 
+
+        this.displayedPage = this.displayedData.slice(this.startingRecord, this.endingRecord);
+        this.startingRecord = this.startingRecord + 1;
+        this.emptyCheck();
     }
 
     handlePreviousPage() {
         if (this.page > 1) {
             this.page = this.page - 1;
-            this.displayRecordPerPage(this.page);
+            this.displayPage();
         }
     }
 
     handleNextPage() {
         if((this.page<this.totalPage) && this.page !== this.totalPage){
             this.page = this.page + 1;
-            this.displayRecordPerPage(this.page);            
+            this.displayPage();            
         }             
     }
 
     handleFirstPage() {
         this.page = 1;
-        this.displayRecordPerPage(this.page);            
+        this.displayPage();            
     }
 
     handleLastPage() {
         this.page = this.totalPage;
-        this.displayRecordPerPage(this.page);            
+        this.displayPage();            
     }
 
-    handleClear() {
-        this.currentCategory = 'All';
-        this.template.querySelector('c-todo-search').handleReset();
-    }
+    resizeListener = () => {
+        this.widthOutput = window.innerWidth;
+    };
 
     connectedCallback() {
+        window.addEventListener('resize', this.resizeListener);
         loadStyle(this, noHeader);
+
+        getRecordTypes()
+            .then((result) => {
+                for (let key in result) {
+                    this.recordTypes.push({label:key, value:result[key]});
+                }
+            })
+            .catch((error) => {
+                alert(error);
+            });
     }
+
 }

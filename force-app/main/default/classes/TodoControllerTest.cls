@@ -1,22 +1,18 @@
 @isTest
 private class TodoControllerTest {
 
-    @testSetup
-    static void setup() {
-        TodoTriggerHandler.enableTrigger = false;
-        SubTodoTriggerHandler.enableTrigger = false;
-        Todo__c todo = new Todo__c(Name = 'test todo', Status__c = 'In progress');
-        insert new List<Todo__c> {
-            todo, new Todo__c(Name = 'alt test todo', Status__c = 'Done')
-        };
-        insert new List<SubTodo__c> {
-            new SubTodo__c(Name = 'test sub one', Master__c = todo.Id),
-            new SubTodo__c(Name = 'test sub two', Master__c = todo.Id)
-        };
-    }
-
     @isTest
     static void getMapTest() {
+        TodoTriggerHandler.enableTrigger = false;
+        SubTodoTriggerHandler.enableTrigger = false;
+
+        Todo__c testTodo = new Todo__c(Name = 'test todo', Status__c = 'In progress');
+        insert new List<Todo__c> { testTodo, new Todo__c(Name = 'alt test todo', Status__c = 'Done') };
+        insert new List<SubTodo__c> {
+            new SubTodo__c(Name = 'test sub one', Master__c = testTodo.Id),
+            new SubTodo__c(Name = 'test sub two', Master__c = testTodo.Id)
+        };
+
         Map<String, List<SubTodo__c>> todoMap = TodoController.getTodoMap();
         
         System.assertEquals(todoMap.keySet().size(), 2);
@@ -34,6 +30,13 @@ private class TodoControllerTest {
     }
 
     @isTest
+    static void getRecordTypesTest() {
+        Map<String, String> typesMap = TodoController.getRecordTypes();
+        System.assertNotEquals(null, typesMap);
+        System.assertEquals(3, typesMap.size());
+    }
+
+/*     @isTest
     static void getSearchedMapTest() {
         Map<String, List<SubTodo__c>> todoMap = TodoController.getSearchedMap('alt');
         
@@ -50,10 +53,8 @@ private class TodoControllerTest {
 
     @isTest
     static void getFullSearchedMapTest() {
-        Id [] fixedSearchResults= new Id[2];
-        SubTodo__c searchedSub = [SELECT Master__c FROM SubTodo__c WHERE Name LIKE '%two%' LIMIT 1];
-        fixedSearchResults[0] = searchedSub.Master__c;
-        fixedSearchResults[1] = searchedSub.Id;
+        Id [] fixedSearchResults= new Id[1];
+        fixedSearchResults[0] = [SELECT Master__c FROM SubTodo__c WHERE Name LIKE '%two%' LIMIT 1].Master__c;
 
         Test.startTest();
         Test.setFixedSearchResults(fixedSearchResults);
@@ -73,5 +74,5 @@ private class TodoControllerTest {
         SubTodo__c sub = todoMap.values().get(0).get(0);
         System.assertEquals(todo.Id, sub.Master__c);
         System.assertEquals('test sub one', sub.Name);
-    }
+    } */
 }

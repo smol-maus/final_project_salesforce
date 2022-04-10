@@ -1,34 +1,11 @@
 <!-- sldsValidatorIgnore -->
 <template>
-    <lightning-layout horizontal-align="space" class="slds-align_absolute-center">
-        <lightning-layout-item flexibility="auto, no-grow" padding="around-small">
-            <lightning-card variant="Narrow" title="Todos">
-                <span slot="actions">
-                    <ul class="slds-list_horizontal">
-                        <li class="slds-var-p-left_x-small slds-m-top_x-small">
-                            (found {totalRecountCount} records)</li>
-                        <li><lightning-button-icon
-                            class="slds-var-m-left_x-small"
-                            icon-name="utility:sync"
-                            onclick={refresh}
-                            alternative-text="Force refresh"
-                        ></lightning-button-icon></li>
-                        <li><lightning-combobox name="recordType" variant="label-hidden"
-                                value={currentCategory} class="slds-var-p-left_x-small"
-                                options={categoryList} onchange={handleCategory}>
-                            </lightning-combobox></li>
-                        <li><lightning-button-stateful
-                            label-when-off="Create" label-when-on="Creating" label-when-hover="Cancel"
-                            icon-name-when-off="utility:retail_execution"
-                            icon-name-when-on="utility:retail_execution"
-                            icon-name-when-hover="utility:reply" class="slds-var-p-left_x-small"
-                            onclick={handleCreateState} selected={createMode}></lightning-button-stateful></li>
-                    </ul>
-                </span>
-            </lightning-card>
+    <lightning-layout horizontal-align="space" class="slds-align_absolute-center" multiple-rows>
+        <lightning-layout-item flexibility="auto" padding="around-small">
+            <c-todo-search searched={isSearched} onreset={handleFindReset} onsearch={handleFind}></c-todo-search>
         </lightning-layout-item>
 
-        <lightning-layout-item flexibility="auto, no-grow" padding="around-small">
+        <lightning-layout-item flexibility="auto" padding="around-small">
             <lightning-card variant="Narrow">
                 <span slot="actions">
                     <ul class="slds-list_horizontal">
@@ -42,20 +19,44 @@
             </lightning-card>
         </lightning-layout-item>
 
-        <lightning-layout-item flexibility="auto, no-grow" padding="around-small">
-            <c-todo-search onfind={handleFind}></c-todo-search>
+        <lightning-layout-item flexibility="auto" padding="around-small">
+            <lightning-card variant="Narrow" title="Todos">
+                <span slot="actions">
+                    <ul class="slds-list_horizontal">
+                        <li><lightning-button-icon
+                            icon-name="utility:sync"
+                            onclick={refresh}
+                            variant="container"
+                            alternative-text="Force refresh"
+                        ></lightning-button-icon></li>
+                        <li class="slds-m-top_x-small">
+                            (found {totalRecountCount} records)</li>
+                        <li><lightning-combobox name="recordType" variant="label-hidden"
+                                value={currentCategory} class="slds-var-p-left_x-small"
+                                options={categoryList} onchange={handleCategory}>
+                            </lightning-combobox></li>
+                        <li><lightning-button-stateful
+                            label-when-off="Create" label-when-on="Creating" label-when-hover="Cancel"
+                            icon-name-when-off="utility:retail_execution"
+                            icon-name-when-on="utility:retail_execution"
+                            icon-name-when-hover="utility:reply" class="slds-var-p-left_x-small"
+                            onclick={handleCreateState} selected={createState}></lightning-button-stateful></li>
+                    </ul>
+                </span>
+            </lightning-card>
         </lightning-layout-item>
     </lightning-layout>
 
-    <template if:true={createMode}>
-        <c-todo-create onsuccess={successEventToast} onnocreate={handleCreateState}></c-todo-create>
+    <template if:true={createState}>
+        <c-todo-create ontodocreate={createTodo} rtypes={recordTypes} onnocreate={handleCreateState}></c-todo-create>
     </template>
 
-    <template if:false={createMode}>
+    <template if:false={createState}>
         <lightning-layout vertical-align="stretch" multiple-rows>
             <template for:each={displayedPage} for:item="keyValue">
-                <lightning-layout-item  size="3" padding="around-small" key={keyValue.key.Id}>
-                    <c-todo-item todo={keyValue.key} subs={keyValue.value} onsuccess={successEventToast}>
+                <lightning-layout-item flexibility="auto, no-grow" size={cardSize} padding="around-small" key={keyValue.key.Id}>
+                    <c-todo-item ontodoedit={updateTodo} ontododelete={deleteTodo}
+                        rtypes={recordTypes} todoitem={keyValue.key} subitems={keyValue.value}>
                     </c-todo-item>
                 </lightning-layout-item>
             </template>
@@ -72,7 +73,7 @@
                     label="Clear Parameters"
                     variant="brand"
                     class="slds-m-top_medium"
-                    onclick={handleClear}
+                    onclick={handleClearParameters}
                 ></lightning-button></div>
             </lightning-card>
         </lightning-layout>

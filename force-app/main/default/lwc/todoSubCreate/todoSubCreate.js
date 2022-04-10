@@ -14,24 +14,25 @@ export default class TodoSubCreate extends LightningElement {
     }
 
     handleSave() {
-        const allValid = [...this.template.querySelectorAll('lightning-input')]
-            .reduce((validSoFar, inputFields) => {
-                inputFields.reportValidity();
-                return validSoFar && inputFields.checkValidity();
-            }, true);
-        if (allValid) {
+        let name = this.template.querySelector("[data-field='Name']").value;
+        const valid = (name.trim().length === 0) ? false : true;
+
+        if (valid) {
             const fields = {};
-            fields[NAME_FIELD.fieldApiName] = this.template.querySelector("[data-field='Name']").value;
+            fields[NAME_FIELD.fieldApiName] = name;
             fields[MASTER_FIELD.fieldApiName] = this.master;
-            const recordInput = {
-                apiName: SUB_OBJECT.objectApiName,
-                fields
-            };
+            const recordInput = { apiName: SUB_OBJECT.objectApiName, fields };
             createRecord(recordInput)
-                .then((todo) => {
+                .then((output) => {
+                    let sub = {};
+                    sub.Id = output.id;
+                    sub.Name = name;
+                    sub.Done__c = false;
+                    sub.Master__c = this.master;
+
                     this.handleState();
-                    const subEvent = new CustomEvent('success', {
-                        detail: 'Sub goal added!'
+                    const subEvent = new CustomEvent('create', {
+                        detail: sub
                     });
                     this.dispatchEvent(subEvent);
                 })

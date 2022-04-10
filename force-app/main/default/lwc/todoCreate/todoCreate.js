@@ -1,6 +1,5 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, api } from 'lwc';
 import { createRecord } from 'lightning/uiRecordApi';
-import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import { reduceErrors } from 'c/ldsUtils';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import TODO_OBJECT from '@salesforce/schema/Todo__c';
@@ -8,38 +7,21 @@ import NAME_FIELD from '@salesforce/schema/Todo__c.Name';
 import STATUS_FIELD from '@salesforce/schema/Todo__c.Status__c'
 import RECORD_TYPE from '@salesforce/schema/Todo__c.RecordTypeId'
 import DESCRIPTION_FIELD from '@salesforce/schema/Todo__c.Description__c'
-const master = 'Master';
-const expired = 'Expired';
 
 export default class TodoCreate extends LightningElement {
+
+    @api rtypes;
+    
     name = '';
+    description = '';
     status = 'Ready to Take';
     recordTypeId;
-    description;
-
-    @wire(getObjectInfo, { objectApiName: TODO_OBJECT}) objectInfo;
-
-    get recordTypes() {
-        var recordtypeinfo = this.objectInfo.data.recordTypeInfos;
-        var uiCombobox = [];
-        for(var eachRecordtype in recordtypeinfo)
-        {
-          if(recordtypeinfo.hasOwnProperty(eachRecordtype)
-                && recordtypeinfo[eachRecordtype].name != master
-                && recordtypeinfo[eachRecordtype].name != expired
-            )
-          uiCombobox.push({ label: recordtypeinfo[eachRecordtype].name, value: recordtypeinfo[eachRecordtype].recordTypeId })
-        }
-        return uiCombobox;
-    }
 
     createTodo() {
-        const allValid = [...this.template.querySelectorAll('lightning-input')]
-        .reduce((validSoFar, inputFields) => {
-            inputFields.reportValidity();
-            return validSoFar && inputFields.checkValidity();
-        }, true);
-        if (allValid){
+        let field = this.name;
+        const valid = (field.trim().length === 0) ? false : true;
+
+        if (valid){
             const fields = {};
             fields[NAME_FIELD.fieldApiName] = this.name;
             fields[STATUS_FIELD.fieldApiName] = this.status;
@@ -47,9 +29,21 @@ export default class TodoCreate extends LightningElement {
             fields[DESCRIPTION_FIELD.fieldApiName] = this.description;
             const recordInput = { apiName: TODO_OBJECT.objectApiName, fields };
             createRecord(recordInput)
-                .then((todo) => {
-                    const createEvent = new CustomEvent('success', {
-                        detail: 'Todo created!'
+                .then((output) => {
+                    let todo = {};
+                    todo.Name = this.name;
+                    todo.Status__c = this.status;
+                    todo.Description__c = this.description;
+
+                    todo.Id = output.id;
+                    todo.RecordTypeId = output.recordTypeId;
+                    todo.RecordType = {Name:output.recordTypeInfo.name};
+                    todo.Owner = {Name:output.fields.CreatedBy.displayValue};
+                    let date = output.fields.CreatedDate.value;
+                    todo.CreatedDate = date;
+
+                    const createEvent = new CustomEvent('todocreate', {
+                        detail: todo
                     });
                     this.dispatchEvent(createEvent);
                 })
@@ -82,8 +76,11 @@ export default class TodoCreate extends LightningElement {
     handleType(event) {
         this.recordTypeId = event.target.value;
     }
-    handleDescription(event){
+    handleDescription(event) {
         this.description = event.target.value;
+    }
+    cancelCreate() {
+        this.dispatchEvent(new CustomEvent('nocreate'));
     }
 
     get statuses() {
@@ -92,9 +89,5 @@ export default class TodoCreate extends LightningElement {
             { label: 'In progress', value: 'In progress' },
             { label: 'Done', value: 'Done' },
         ];
-    }
-
-    cancelCreate(){
-        this.dispatchEvent(new CustomEvent('nocreate'));
     }
 }

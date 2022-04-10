@@ -8,24 +8,29 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { reduceErrors } from 'c/ldsUtils';
 
 export default class TodoSubItem extends LightningElement {
-    @api sub;
+    sub;
     editMode = false;
-    name;
-    done;
 
-    connectedCallback(){   
-        this.name = this.sub.Name;
-        this.done = this.sub.Done__c;
+    @api
+    set subitem(input) {
+        this.sub = JSON.parse(JSON.stringify(input));
+    }
+    get subitem() {
+        return this.sub;
     }
 
-    handleDelete(event){
-        const recordId = event.target.dataset.recordid;
+    handleEdit() {
+        this.editMode = !this.editMode;
+    }
+
+    handleDelete(){
+        const recordId = this.sub.Id;
         deleteRecord(recordId)
             .then(() => {
-                const subEvent = new CustomEvent('success', {
-                    detail: 'Sub goal deleted'
+                const subDelete = new CustomEvent('subdelete', {
+                    detail: recordId
                 });
-                this.dispatchEvent(subEvent);
+                this.dispatchEvent(subDelete);
             })
             .catch((error) => {
                 this.dispatchEvent(
@@ -38,30 +43,27 @@ export default class TodoSubItem extends LightningElement {
             });
     }
 
-    handleSave(event) {
-        const allValid = [...this.template.querySelectorAll('lightning-input')]
-            .reduce((validSoFar, inputFields) => {
-                inputFields.reportValidity();
-                return validSoFar && inputFields.checkValidity();
-            }, true);
-        if (allValid){
+    handleSave() {
+        let name = this.template.querySelector("[data-field='Name']").value;
+        const valid = (name.trim().length === 0) ? false : true;
+
+        if (valid){
             const fields = {};
             fields[ID_FIELD.fieldApiName] = this.sub.Id;
-            fields[NAME_FIELD.fieldApiName] = this.template.querySelector("[data-field='Name']").value;
+            fields[NAME_FIELD.fieldApiName] = name;
             fields[DONE_FIELD.fieldApiName] = this.template.querySelector("[data-field='Done']").checked;
             const recordInput = { fields };
             
             updateRecord(recordInput)
                 .then(() => {
-                    this.name = fields[NAME_FIELD.fieldApiName];
-                    this.done = fields[DONE_FIELD.fieldApiName];
+                    this.sub.Name = fields.Name;
+                    this.sub.Done__c = fields.Done__c;
                     this.handleEdit();
-                    this.dispatchEvent( new ShowToastEvent({
-                        title: 'Success',
-                        message: 'Subgoal updated',
-                        variant: 'success'
-                    })
-                );
+
+                    const subEdit = new CustomEvent('subedit', {
+                        detail: this.sub
+                    });
+                    this.dispatchEvent(subEdit);
                 })
                 .catch(error => {
                     this.dispatchEvent(
@@ -82,9 +84,4 @@ export default class TodoSubItem extends LightningElement {
             );
         }
     }
-
-    handleEdit() {
-        this.editMode = !this.editMode;
-    }
-
 }

@@ -4,25 +4,24 @@
             <lightning-card>
                 <h6 slot="title">
                     <lightning-input class="slds-var-p-left_xx-small" label="Name" required placeholder="Enter name"
-                        variant="label-hidden" onchange={handleName}></lightning-input>
+                        data-field='Name' variant="label-hidden" onchange={handleName}></lightning-input>
                 </h6>
 
                 <div class="slds-card__body slds-card__body_inner">
 
                     <ul class="slds-list_horizontal">
                         <lightning-layout-item flexibility="grow">
-                            <template if:true={objectInfo.data}>
-                                <li>
-                                    <lightning-combobox label="Due time" placeholder="Today" value={recordTypeId}
-                                        options={recordTypes} onchange={handleType}>
-                                    </lightning-combobox>
-                                </li>
-                            </template>
+                            <li>
+                                <lightning-combobox label="Due time" placeholder="Today" value={recordTypeId}
+                                    options={rtypes} onchange={handleType}>
+                                </lightning-combobox>
+                            </li>
                         </lightning-layout-item>
                         <lightning-layout-item flexibility="grow">
                             <li>
                                 <lightning-combobox label="Status" value={status} class="slds-var-p-left_xx-small"
-                                    options={statuses} onchange={handleStatus}></lightning-combobox>
+                                    options={statuses} onchange={handleStatus}>
+                                </lightning-combobox>
                             </li>
                         </lightning-layout-item>
                     </ul>
